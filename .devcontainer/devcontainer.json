@@ -1,0 +1,26 @@
+{
+	"name": "S4L Dev Container",
+	"image": "registry.speag.com/ci/osparc-osparc-s4l/release-sim4life-8-2/s4l-jupyter:3.1.139",
+	"workspaceFolder": "/home/smu/work",
+	"dockerComposeFile": "${localWorkspaceFolder}/.devcontainer/docker-compose.yml",
+	"service": "s4l-jupyter",
+	"customizations": {
+	  "vscode": {
+		"settings": {
+		  "python.pythonPath": "/home/smu/services/supermash/Python/.venv/bin/python"
+		},
+		"extensions": [
+		  "ms-python.python",
+		  "ms-toolsai.jupyter"
+		]
+	  }
+	},
+	"mounts": [
+	  "source=${localWorkspaceFolder},target=/home/smu/work,type=bind"
+	],
+	"remoteUser": "smu",
+	"remoteEnv": {
+	  "SPEAG_LICENSE_FILE": "27000@172.16.8.8"
+	}
+  }
+  

@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  s4l-jupyter:
+    # image: registry.speag.com/ci/osparc-osparc-s4l/release-sim4life-8-2/s4l-jupyter:3.1.139
+    ports:
+      - "8888:8888"
+    environment:
+      - SPEAG_LICENSE_FILE=27000@license.speag.com
+    volumes:
+      - ${PWD}/validation/workspace:/home/smu/work/workspace
+      - ${PWD}/validation/inputs:/home/smu/.hidden_inputs
+      - ${PWD}/validation/outputs:/home/smu/.hidden_outputs
+      - /usr/share/vulkan/icd.d:/usr/share/vulkan/icd.d
+      - /etc/vulkan/icd.d:/etc/vulkan/icd.d
