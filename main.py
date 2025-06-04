@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
+import time
+start_time = time.time()
 
 import os
 import pathlib as pl
@@ -10,29 +12,25 @@ from s4l_v1._api.application import run_application, get_app_safe
 
 x11_available = "DISPLAY" in os.environ
 if get_app_safe() is None:
-    run_application(disable_ui_plugins=not x11_available)
+	run_application(disable_ui_plugins=not x11_available)
 app = get_app_safe()
 
 osparc=True
 if osparc:
-    if 'INPUTS_FOLDER' in os.environ:
-        input_folder = Path(os.environ['INPUTS_FOLDER'])
-        output_folder = Path(os.environ['OUTPUTS_FOLDER'])
-        comp_service = False
-    elif 'INPUT_FOLDER' in os.environ:
-        input_folder = Path(os.environ['INPUT_FOLDER'])
-        output_folder = Path(os.environ['OUTPUT_FOLDER'])
-        comp_service = True
-    else:
-        raise Exception("No INPUTS_FOLDER or INPUTS found in environment variables")
-    current_path = Path(os.getcwd())
+	if 'INPUTS_FOLDER' in os.environ:
+		input_folder = Path(os.environ['INPUTS_FOLDER'])
+		output_folder = Path(os.environ['OUTPUTS_FOLDER'])
+		comp_service = False
+	elif 'INPUT_FOLDER' in os.environ:
+		input_folder = Path(os.environ['INPUT_FOLDER'])
+		output_folder = Path(os.environ['OUTPUT_FOLDER'])
+		comp_service = True
+	else:
+		raise Exception("No INPUTS_FOLDER or INPUTS found in environment variables")
+	current_path = Path(os.getcwd())
 else:
-    input_folder="/home/smu/work/inputs/input_1"
-    output_folder="/home/smu/work/outputs/output_1"	
-
-inputfolder=input_folder
-outputfolder=output_folder
-
+	input_folder="/home/smu/work/inputs/input_1"
+	output_folder="/home/smu/work/outputs/output_1"	
 
 import numpy
 import s4l_v1.analysis as analysis
@@ -42,7 +40,6 @@ import s4l_v1.units as units
 import XCoreModeling as xcm
 from s4l_v1.model import Unit
 from s4l_v1.simulation import emlf, neuron
-import s4l_v1.materials.database as database
 
 import XCoreModeling as xcm
 from s4l_v1 import Vec3
@@ -52,293 +49,290 @@ import json
 
 
 # ## Reading the Parameter File
-
 input_values_path = pl.Path(input_folder) / "values.json"
 # Gets the electrode parameters
 input_values = json.loads(input_values_path.read_text())
-
-
-input_folder="/home/smu/work/workspace"
 filename_model=os.path.join(input_folder,'Nerve_Model.sab')
 
 def Creates_EM_Simulation():
+	import s4l_v1.materials.database as database
 
-    # Creating the simulation
-    simulation = emlf.ElectroQsOhmicSimulation()
+	# Creating the simulation
+	simulation = emlf.ElectroQsOhmicSimulation()
 
-    # Mapping the components and entities
-    component__plane_x = simulation.AllComponents["Plane X+"]
-    component__plane_x = simulation.AllComponents["Plane X-"]
-    component__background = simulation.AllComponents["Background"]
-    component__plane_y = simulation.AllComponents["Plane Y+"]
-    component__plane_y = simulation.AllComponents["Plane Y-"]
-    component__plane_z = simulation.AllComponents["Plane Z+"]
-    component__plane_z = simulation.AllComponents["Plane Z-"]
-    component__overall_field = simulation.AllComponents["Overall Field"]
-    entity__contact1 = model.AllEntities()["Contact 1"]
-    entity__blood2 = model.AllEntities()["Blood 2"]
-    entity__fascicle1 = model.AllEntities()["Fascicle 1"]
-    entity__fascicle3 = model.AllEntities()["Fascicle 3"]
-    entity__fascicle4 = model.AllEntities()["Fascicle 4"]
-    entity__fascicle2 = model.AllEntities()["Fascicle 2"]
-    entity__fascicle7 = model.AllEntities()["Fascicle 7"]
-    entity__connective_2b = model.AllEntities()["Connective_2b"]
-    entity__blood3 = model.AllEntities()["Blood 3"]
-    entity__fascicle5 = model.AllEntities()["Fascicle 5"]
-    entity__connective_2a = model.AllEntities()["Connective_2a"]
-    entity__saline = model.AllEntities()["Saline"]
-    entity__connective = model.AllEntities()["Connective"]
-    entity__nerve = model.AllEntities()["Nerve"]
-    entity__silicone = model.AllEntities()["Silicone"]
-    entity__interstitial = model.AllEntities()["Interstitial"]
-    entity__fascicle6 = model.AllEntities()["Fascicle 6"]
-    entity__contact2 = model.AllEntities()["Contact 2"]
-    entity__blood1 = model.AllEntities()["Blood 1"]
+	# Mapping the components and entities
+	component__plane_x = simulation.AllComponents["Plane X+"]
+	component__plane_x = simulation.AllComponents["Plane X-"]
+	component__background = simulation.AllComponents["Background"]
+	component__plane_y = simulation.AllComponents["Plane Y+"]
+	component__plane_y = simulation.AllComponents["Plane Y-"]
+	component__plane_z = simulation.AllComponents["Plane Z+"]
+	component__plane_z = simulation.AllComponents["Plane Z-"]
+	component__overall_field = simulation.AllComponents["Overall Field"]
+	entity__contact1 = model.AllEntities()["Contact 1"]
+	entity__blood2 = model.AllEntities()["Blood 2"]
+	entity__fascicle1 = model.AllEntities()["Fascicle 1"]
+	entity__fascicle3 = model.AllEntities()["Fascicle 3"]
+	entity__fascicle4 = model.AllEntities()["Fascicle 4"]
+	entity__fascicle2 = model.AllEntities()["Fascicle 2"]
+	entity__fascicle7 = model.AllEntities()["Fascicle 7"]
+	entity__connective_2b = model.AllEntities()["Connective_2b"]
+	entity__blood3 = model.AllEntities()["Blood 3"]
+	entity__fascicle5 = model.AllEntities()["Fascicle 5"]
+	entity__connective_2a = model.AllEntities()["Connective_2a"]
+	entity__saline = model.AllEntities()["Saline"]
+	entity__connective = model.AllEntities()["Connective"]
+	entity__nerve = model.AllEntities()["Nerve"]
+	entity__silicone = model.AllEntities()["Silicone"]
+	entity__interstitial = model.AllEntities()["Interstitial"]
+	entity__fascicle6 = model.AllEntities()["Fascicle 6"]
+	entity__contact2 = model.AllEntities()["Contact 2"]
+	entity__blood1 = model.AllEntities()["Blood 1"]
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__silicone]
-    material_settings.Name = "Silicone"
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__silicone]
+	material_settings.Name = "Silicone"
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__blood1, entity__blood2, entity__blood3]
-    mat = database["IT'IS LF 4.2"]["Blood"]
-    if mat is not None:
-        simulation.LinkMaterialWithDatabase(material_settings, mat)
-    else:
-        # Fallback if material is not found
-        material_settings.Name = "Blood"
-        material_settings.MassDensity = 1049.75, Unit("kg/m^3")
-        material_settings.ElectricProps.Conductivity = 0.6624597361833767, Unit("S/m")
-        material_settings.ElectricProps.RelativePermittivity = 5258.608390020375
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__blood1, entity__blood2, entity__blood3]
+	mat = database["IT'IS LF 4.2"]["Blood"]
+	if mat is not None:
+		simulation.LinkMaterialWithDatabase(material_settings, mat)
+	else:
+		# Fallback if material is not found
+		material_settings.Name = "Blood"
+		material_settings.MassDensity = 1049.75, Unit("kg/m^3")
+		material_settings.ElectricProps.Conductivity = 0.6624597361833767, Unit("S/m")
+		material_settings.ElectricProps.RelativePermittivity = 5258.608390020375
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__connective, entity__connective_2a, entity__connective_2b]
-    mat = database["IT'IS LF 4.2"]["Connective Tissue"]
-    if mat is not None:
-        simulation.LinkMaterialWithDatabase(material_settings, mat)
-    else:
-        # Fallback if material is not found
-        material_settings.Name = "Connective Tissue"
-        material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-        material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
-        material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__connective, entity__connective_2a, entity__connective_2b]
+	mat = database["IT'IS LF 4.2"]["Connective Tissue"]
+	if mat is not None:
+		simulation.LinkMaterialWithDatabase(material_settings, mat)
+	else:
+		# Fallback if material is not found
+		material_settings.Name = "Connective Tissue"
+		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
+		material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
+		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
-    material_settings.Name = "Fascicles"
-    material_settings.ElectricProps.ConductivityAnisotropic = True
-    material_settings.ElectricProps.ConductivityDiagonalElements = numpy.array([0.16, 0.16, 0.57]), Unit("S/m")
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
+	material_settings.Name = "Fascicles"
+	material_settings.ElectricProps.ConductivityAnisotropic = True
+	material_settings.ElectricProps.ConductivityDiagonalElements = numpy.array([0.16, 0.16, 0.57]), Unit("S/m")
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__interstitial]
-    mat = database["IT'IS LF 4.2"]["Connective Tissue"]
-    if mat is not None:
-        simulation.LinkMaterialWithDatabase(material_settings, mat)
-    else:
-        # Fallback if material is not found
-        material_settings.Name = "Connective Tissue"
-        material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-        material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
-        material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__interstitial]
+	mat = database["IT'IS LF 4.2"]["Connective Tissue"]
+	if mat is not None:
+		simulation.LinkMaterialWithDatabase(material_settings, mat)
+	else:
+		# Fallback if material is not found
+		material_settings.Name = "Connective Tissue"
+		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
+		material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
+		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__nerve]
-    mat = database["IT'IS LF 4.2"]["Nerve"]
-    if mat is not None:
-        simulation.LinkMaterialWithDatabase(material_settings, mat)
-    else:
-        # Fallback if material is not found
-        material_settings.Name = "Nerve"
-        material_settings.MassDensity = 1075.0, Unit("kg/m^3")
-        material_settings.ElectricProps.Conductivity = 0.3479543931346832, Unit("S/m")
-        material_settings.ElectricProps.RelativePermittivity = 69911.4914652573
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__nerve]
+	mat = database["IT'IS LF 4.2"]["Nerve"]
+	if mat is not None:
+		simulation.LinkMaterialWithDatabase(material_settings, mat)
+	else:
+		# Fallback if material is not found
+		material_settings.Name = "Nerve"
+		material_settings.MassDensity = 1075.0, Unit("kg/m^3")
+		material_settings.ElectricProps.Conductivity = 0.3479543931346832, Unit("S/m")
+		material_settings.ElectricProps.RelativePermittivity = 69911.4914652573
+	simulation.Add(material_settings, components)
 
-    # Adding a new MaterialSettings
-    material_settings = emlf.MaterialSettings()
-    components = [entity__saline]
-    material_settings.Name = "Saline"
-    material_settings.ElectricProps.Conductivity = 2.0, Unit("S/m")
-    simulation.Add(material_settings, components)
+	# Adding a new MaterialSettings
+	material_settings = emlf.MaterialSettings()
+	components = [entity__saline]
+	material_settings.Name = "Saline"
+	material_settings.ElectricProps.Conductivity = 2.0, Unit("S/m")
+	simulation.Add(material_settings, components)
 
-    # Editing BoundarySettings "Boundary Settings
-    boundary_settings = [x for x in simulation.AllSettings if isinstance(x, emlf.BoundarySettings) and x.Name == "Boundary Settings"][0]
-    components = [component__plane_x, component__plane_x, component__plane_y, component__plane_y, component__plane_z, component__plane_z]
-    simulation.Add(boundary_settings, components)
-    boundary_settings.BoundaryType = boundary_settings.BoundaryType.enum.Flux
+	# Editing BoundarySettings "Boundary Settings
+	boundary_settings = [x for x in simulation.AllSettings if isinstance(x, emlf.BoundarySettings) and x.Name == "Boundary Settings"][0]
+	components = [component__plane_x, component__plane_x, component__plane_y, component__plane_y, component__plane_z, component__plane_z]
+	simulation.Add(boundary_settings, components)
+	boundary_settings.BoundaryType = boundary_settings.BoundaryType.enum.Flux
 
-    # Adding a new BoundarySettings
-    boundary_settings = emlf.BoundarySettings()
-    components = [entity__contact1]
-    boundary_settings.Name = "Anode"
-    boundary_settings.DirichletValue = 0.5, units.Volts
-    simulation.Add(boundary_settings, components)
+	# Adding a new BoundarySettings
+	boundary_settings = emlf.BoundarySettings()
+	components = [entity__contact1]
+	boundary_settings.Name = "Anode"
+	boundary_settings.DirichletValue = 0.5, units.Volts
+	simulation.Add(boundary_settings, components)
 
-    # Adding a new BoundarySettings
-    boundary_settings = emlf.BoundarySettings()
-    components = [entity__contact2]
-    boundary_settings.Name = "Catode"
-    boundary_settings.DirichletValue = -0.5, units.Volts
-    simulation.Add(boundary_settings, components)
+	# Adding a new BoundarySettings
+	boundary_settings = emlf.BoundarySettings()
+	components = [entity__contact2]
+	boundary_settings.Name = "Catode"
+	boundary_settings.DirichletValue = -0.5, units.Volts
+	simulation.Add(boundary_settings, components)
 
-    # Editing GlobalGridSettings "Grid (Empty)
-    global_grid_settings = simulation.GlobalGridSettings
-    global_grid_settings.DiscretizationMode = global_grid_settings.DiscretizationMode.enum.Manual
-    global_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
-    global_grid_settings.Resolution = numpy.array([0.625, 0.625, 0.625]), units.MilliMeters
-    global_grid_settings.PaddingMode = global_grid_settings.PaddingMode.enum.Manual
-    global_grid_settings.BottomPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
-    global_grid_settings.TopPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
+	# Editing GlobalGridSettings "Grid (Empty)
+	global_grid_settings = simulation.GlobalGridSettings
+	global_grid_settings.DiscretizationMode = global_grid_settings.DiscretizationMode.enum.Manual
+	global_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
+	global_grid_settings.Resolution = numpy.array([0.625, 0.625, 0.625]), units.MilliMeters
+	global_grid_settings.PaddingMode = global_grid_settings.PaddingMode.enum.Manual
+	global_grid_settings.BottomPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
+	global_grid_settings.TopPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
 
-    # Adding a new ManualGridSettings
-    manual_grid_settings = simulation.AddManualGridSettings([entity__blood1, entity__blood2, entity__blood3, entity__connective, entity__connective_2a, entity__connective_2b, entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7, entity__interstitial, entity__nerve])
-    manual_grid_settings.Name = "Nerve"
-    manual_grid_settings.MaxStep = numpy.array([0.01, 0.01, 0.05]), units.MilliMeters
-    manual_grid_settings.Priority = 0.0
+	# Adding a new ManualGridSettings
+	manual_grid_settings = simulation.AddManualGridSettings([entity__blood1, entity__blood2, entity__blood3, entity__connective, entity__connective_2a, entity__connective_2b, entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7, entity__interstitial, entity__nerve])
+	manual_grid_settings.Name = "Nerve"
+	manual_grid_settings.MaxStep = numpy.array([0.01, 0.01, 0.05]), units.MilliMeters
+	manual_grid_settings.Priority = 0.0
 
-    # Adding a new ManualGridSettings
-    manual_grid_settings = simulation.AddManualGridSettings([entity__contact1, entity__contact2, entity__saline, entity__silicone])
-    manual_grid_settings.Name = "Else"
-    manual_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
-    manual_grid_settings.Priority = 0.0
+	# Adding a new ManualGridSettings
+	manual_grid_settings = simulation.AddManualGridSettings([entity__contact1, entity__contact2, entity__saline, entity__silicone])
+	manual_grid_settings.Name = "Else"
+	manual_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
+	manual_grid_settings.Priority = 0.0
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__saline]
-    manual_voxeler_settings.Name = "Saline"
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__saline]
+	manual_voxeler_settings.Name = "Saline"
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__silicone]
-    manual_voxeler_settings.Name = "Silicone"
-    manual_voxeler_settings.Priority = 1
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__silicone]
+	manual_voxeler_settings.Name = "Silicone"
+	manual_voxeler_settings.Priority = 1
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__contact1, entity__contact2]
-    manual_voxeler_settings.Name = "Contacts"
-    manual_voxeler_settings.Priority = 2
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__contact1, entity__contact2]
+	manual_voxeler_settings.Name = "Contacts"
+	manual_voxeler_settings.Priority = 2
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__nerve]
-    manual_voxeler_settings.Name = "Nerve"
-    manual_voxeler_settings.Priority = 3
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__nerve]
+	manual_voxeler_settings.Name = "Nerve"
+	manual_voxeler_settings.Priority = 3
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__interstitial]
-    manual_voxeler_settings.Name = "Intrafascicular"
-    manual_voxeler_settings.Priority = 4
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__interstitial]
+	manual_voxeler_settings.Name = "Intrafascicular"
+	manual_voxeler_settings.Priority = 4
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
-    manual_voxeler_settings.Name = "Fascicles"
-    manual_voxeler_settings.Priority = 7
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
+	manual_voxeler_settings.Name = "Fascicles"
+	manual_voxeler_settings.Priority = 7
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__blood1, entity__blood2, entity__blood3]
-    manual_voxeler_settings.Name = "Blood"
-    manual_voxeler_settings.Priority = 6
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__blood1, entity__blood2, entity__blood3]
+	manual_voxeler_settings.Name = "Blood"
+	manual_voxeler_settings.Priority = 6
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Adding a new ManualVoxelerSettings
-    manual_voxeler_settings = emlf.ManualVoxelerSettings()
-    components = [entity__connective, entity__connective_2a, entity__connective_2b]
-    manual_voxeler_settings.Name = "Connective"
-    manual_voxeler_settings.Priority = 5
-    simulation.Add(manual_voxeler_settings, components)
+	# Adding a new ManualVoxelerSettings
+	manual_voxeler_settings = emlf.ManualVoxelerSettings()
+	components = [entity__connective, entity__connective_2a, entity__connective_2b]
+	manual_voxeler_settings.Name = "Connective"
+	manual_voxeler_settings.Priority = 5
+	simulation.Add(manual_voxeler_settings, components)
 
-    # Editing SolverSettings "Solver
-    solver_settings = simulation.SolverSettings
-    solver_settings.PredefinedTolerances = solver_settings.PredefinedTolerances.enum.High
+	# Editing SolverSettings "Solver
+	solver_settings = simulation.SolverSettings
+	solver_settings.PredefinedTolerances = solver_settings.PredefinedTolerances.enum.High
 
-    # Update the materials with the new frequency parameters
-    simulation.UpdateAllMaterials()
+	# Update the materials with the new frequency parameters
+	simulation.UpdateAllMaterials()
 
-    # Update the grid with the new parameters
-    simulation.UpdateGrid()
+	# Update the grid with the new parameters
+	simulation.UpdateGrid()
 
-    # Add the simulation to the UI
-    document.AllSimulations.Add( simulation )
+	# Add the simulation to the UI
+	document.AllSimulations.Add( simulation )
 
-    return simulation
+	return simulation
 
 
 def Creates_Electrode(length,gap,angle,radius,silicone_length):
 
-    center=Vec3(0,0,1)
+	center=Vec3(0,0,1)
 
-    angle=(360-angle)*2*np.pi/360
-    start=0.5*angle
-    end=-0.5*angle
+	angle=(360-angle)*2*np.pi/360
+	start=0.5*angle
+	end=-0.5*angle
 
-    # Creates the Arc
-    arc=xcm.CreateArc(center,radius,start,end)
-    vertices=[v.Position for v in xcm.GetVertices(arc)]
+	# Creates the Arc
+	arc=xcm.CreateArc(center,radius,start,end)
+	vertices=[v.Position for v in xcm.GetVertices(arc)]
 
-    verts=[arc]
-    for v in vertices:
-        verts.append(s4l.model.CreatePolyLine([center,v]))
+	verts=[arc]
+	for v in vertices:
+		verts.append(s4l.model.CreatePolyLine([center,v]))
 
-    s1=s4l.model.Unite(verts)
-    xcm.CoverWireBody(s1)
+	s1=s4l.model.Unite(verts)
+	xcm.CoverWireBody(s1)
 
-    contact=ents['Arc 1']
-    contact.Name="Contact 1"
+	contact=ents['Arc 1']
+	contact.Name="Contact 1"
 
-    arc=xcm.CreateArc(center,radius+0.05,start-0.1,end+0.1)
-    vertices=[v.Position for v in xcm.GetVertices(arc)]
+	arc=xcm.CreateArc(center,radius+0.05,start-0.1,end+0.1)
+	vertices=[v.Position for v in xcm.GetVertices(arc)]
 
-    verts=[arc]
-    for v in vertices:
-        verts.append(s4l.model.CreatePolyLine([center,v]))
+	verts=[arc]
+	for v in vertices:
+		verts.append(s4l.model.CreatePolyLine([center,v]))
 
-    s1=s4l.model.Unite(verts)
-    xcm.CoverWireBody(s1)
+	s1=s4l.model.Unite(verts)
+	xcm.CoverWireBody(s1)
 
-    silicone=ents['Arc 1']
-    silicone.Name="Silicone"
+	silicone=ents['Arc 1']
+	silicone.Name="Silicone"
 
-    e1=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,length)])
-    xcm.SweepAlongPath(contact,e1,True,False)
-    T=s4l.Translation(Vec3(0,0,-0.5*length))
-    contact.ApplyTransform(T)
-    e1.Delete()
+	e1=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,length)])
+	xcm.SweepAlongPath(contact,e1,True,False)
+	T=s4l.Translation(Vec3(0,0,-0.5*length))
+	contact.ApplyTransform(T)
+	e1.Delete()
 
-    contact1=contact.Clone()
-    contact1.Name="Contact 2"
+	contact1=contact.Clone()
+	contact1.Name="Contact 2"
 
-    e2=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,silicone_length)])
-    xcm.SweepAlongPath(silicone,e2,True,False)
-    T=s4l.Translation(Vec3(0,0,-0.5*silicone_length))
-    silicone.ApplyTransform(T)
-    e2.Delete()
+	e2=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,silicone_length)])
+	xcm.SweepAlongPath(silicone,e2,True,False)
+	T=s4l.Translation(Vec3(0,0,-0.5*silicone_length))
+	silicone.ApplyTransform(T)
+	e2.Delete()
 
-    dt=0.5*length+0.5*gap
-    T=s4l.Translation(Vec3(0,0,dt))
-    contact.ApplyTransform(T)
-    T=s4l.Translation(Vec3(0,0,-dt))
-    contact1.ApplyTransform(T)
+	dt=0.5*length+0.5*gap
+	T=s4l.Translation(Vec3(0,0,dt))
+	contact.ApplyTransform(T)
+	T=s4l.Translation(Vec3(0,0,-dt))
+	contact1.ApplyTransform(T)
 
 
 def Gets_Flux(em_sensor_extractor):
@@ -407,15 +401,16 @@ def ExtractsResults(simulation):
 
 	# Extracting Peak Averaged
 	evaluator=volume_average_electric_field_evaluator.Outputs["Volume-Average Report [ICNIRP 2010]"]
-	keys=s.Data.RowKeys()
-	values=s.Data.ToList()
+	assert evaluator.Update()
+	keys=evaluator.Data.RowKeys()
+	values=evaluator.Data.ToList()
 
 	for i in range(len(keys)):
-		print (keys[i].split(' (')[0],values[i][0])
-		
+		print ("Key-value pairs ExtractResults: ", keys[i].split(' (')[0], values[i][0])
+	
 	peak_averaged_field=values[0][0]
 		
-	return [flux,peak_averaged_field]  # Flux Current, Peak Averaged E-Field
+	return [flux, peak_averaged_field]  # Flux Current, Peak Averaged E-Field
 		
 def CreatesNeuroCache(axonlist):
 	sim = neuron.Simulation();
@@ -551,8 +546,11 @@ gap = input_values["number_3"]
 angle = input_values["number_4"]
 silicone_length = input_values["number_5"]
 
+### TODO for testing post-pro -- remove later, start always from scratch
+model_path = output_folder / "model.smash"
 # Creates Electrode Parameterized
 Creates_Electrode(length,gap,angle,radius,silicone_length)
+s4l.document.SaveAs(model_path)
 
 
 # ### Creation of Axon Distribution
@@ -582,10 +580,16 @@ isop5=np.percentile(tf,5)
 isop50=np.percentile(tf,50)
 isop95=np.percentile(tf,95)
 
+end_time = time.time()
+print(f"Total time spent in pipeline: {end_time - start_time} seconds")
 # ### Provide Output Data
 
-output_values = {"number_1": current, "number_2": peak_averaged_field,"number_3":isop5, "number_4":isop50, "number_5":isop95,}
-output_values_path = pl.Path(outputfolder / "values.json")
+output_values = {"current": str(current), "peak_averaged_field": str(peak_averaged_field), "isop5": str(isop5), "isop50": str(isop50), "isop95": str(isop95),}
+print(output_values)
 
+## convert to the format that the (de)jsonifier understand
+output_values = {
+	f"number_{i+1}": value for i, value in enumerate(output_values.values())    
+}
+output_values_path = pl.Path(output_folder / "values.json")
 output_values_path.write_text(json.dumps(output_values))
-

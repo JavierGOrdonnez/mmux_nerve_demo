@@ -8,7 +8,5 @@ services:
       - SPEAG_LICENSE_FILE=27000@license.speag.com
     volumes:
       - ${PWD}/validation/workspace:/home/smu/work/workspace
-      - ${PWD}/validation/inputs:/home/smu/.hidden_inputs
-      - ${PWD}/validation/outputs:/home/smu/.hidden_outputs
-      - /usr/share/vulkan/icd.d:/usr/share/vulkan/icd.d
-      - /etc/vulkan/icd.d:/etc/vulkan/icd.d
+      - ${PWD}/validation/inputs:/home/smu/inputs
+      - ${PWD}/validation/outputs:/home/smu/outputs
