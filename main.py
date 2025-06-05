@@ -29,8 +29,8 @@ if osparc:
 		raise Exception("No INPUTS_FOLDER or INPUTS found in environment variables")
 	current_path = Path(os.getcwd())
 else:
-	input_folder="/home/smu/work/inputs/input_1"
-	output_folder="/home/smu/work/outputs/output_1"	
+	input_folder=Path("/home/smu/work/inputs/input_1")
+	output_folder=Path("/home/smu/work/outputs/output_1")
 
 import numpy
 import s4l_v1.analysis as analysis
@@ -584,7 +584,7 @@ end_time = time.time()
 print(f"Total time spent in pipeline: {end_time - start_time} seconds")
 # ### Provide Output Data
 
-output_values = {"current": str(current), "peak_averaged_field": str(peak_averaged_field), "isop5": str(isop5), "isop50": str(isop50), "isop95": str(isop95),}
+output_values = {"current": float(current), "peak_averaged_field": float(peak_averaged_field), "isop5": float(isop5), "isop50": isop50, "isop95": isop95,}
 print(output_values)
 
 ## convert to the format that the (de)jsonifier understand
