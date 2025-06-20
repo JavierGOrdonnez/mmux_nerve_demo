@@ -49,10 +49,43 @@ else:
 input_values_path = pl.Path(input_folder) / "values.json"
 # Gets the electrode parameters
 input_values = json.loads(input_values_path.read_text())
-filename_model=os.path.join(input_folder,'Nerve_Model.sab')
+filename_model = os.path.join(input_folder, "Nerve_Model.sab")
 
-def Creates_EM_Simulation():
+
+def GetsSurfaceContact():
+
+	# -*- coding: utf-8 -*-
+	import s4l_v1 as s4l
+	import XCoreModeling as xcm
+
+	ents=s4l.model.AllEntities()
+
+	contact=ents['Contact 1']
+	contact=contact.Clone()
+	nerve=ents['Nerve']
+	nerve=nerve.Clone()
+
+	slice=xcm.Slice([contact,nerve])
+
+	surf=xcm.CoverWireBody(slice)
+	surf[0].Name='Interface'
+
+	surface=xcm.MeasureArea([surf[0]])
+
+	print (surface)
+
+	return surface
+
+def Creates_EM_Simulation(sigmas):
 	import s4l_v1.materials.database as database
+
+	sigma_blood=sigmas[0] #0.6624597361833767
+	sigma_connective=sigmas[1] #0.07919585744745661
+	sigma_interst=sigmas[2] #0.07919585744745661
+	sigmas_nerve=sigmas[3] #0.3479543931346832
+	sigmas_saline=sigmas[4] #2.0
+	sigmas_fasc_tra=sigmas[5] # 0.16
+	sigmas_fasc_lon=sigmas[6] #0.57
 
 	# Creating the simulation
 	simulation = emlf.ElectroQsOhmicSimulation()
@@ -102,7 +135,7 @@ def Creates_EM_Simulation():
 		# Fallback if material is not found
 		material_settings.Name = "Blood"
 		material_settings.MassDensity = 1049.75, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = 0.6624597361833767, Unit("S/m")
+		material_settings.ElectricProps.Conductivity = sigma_blood, Unit("S/m")
 		material_settings.ElectricProps.RelativePermittivity = 5258.608390020375
 	simulation.Add(material_settings, components)
 
@@ -116,7 +149,7 @@ def Creates_EM_Simulation():
 		# Fallback if material is not found
 		material_settings.Name = "Connective Tissue"
 		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
+		material_settings.ElectricProps.Conductivity = sigma_connective, Unit("S/m")
 		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
 	simulation.Add(material_settings, components)
 
@@ -133,7 +166,9 @@ def Creates_EM_Simulation():
 	]
 	material_settings.Name = "Fascicles"
 	material_settings.ElectricProps.ConductivityAnisotropic = True
-	material_settings.ElectricProps.ConductivityDiagonalElements = numpy.array([0.16, 0.16, 0.57]), Unit("S/m")
+	material_settings.ElectricProps.ConductivityDiagonalElements = numpy.array(
+		[sigmas_fasc_tra, sigmas_fasc_tra, sigmas_fasc_lon]
+	), Unit("S/m")
 	simulation.Add(material_settings, components)
 
 	# Adding a new MaterialSettings
@@ -146,7 +181,7 @@ def Creates_EM_Simulation():
 		# Fallback if material is not found
 		material_settings.Name = "Connective Tissue"
 		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = 0.07919585744745661, Unit("S/m")
+		material_settings.ElectricProps.Conductivity = sigma_interst, Unit("S/m")
 		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
 	simulation.Add(material_settings, components)
 
@@ -160,7 +195,7 @@ def Creates_EM_Simulation():
 		# Fallback if material is not found
 		material_settings.Name = "Nerve"
 		material_settings.MassDensity = 1075.0, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = 0.3479543931346832, Unit("S/m")
+		material_settings.ElectricProps.Conductivity = sigmas_nerve, Unit("S/m")
 		material_settings.ElectricProps.RelativePermittivity = 69911.4914652573
 	simulation.Add(material_settings, components)
 
@@ -168,7 +203,7 @@ def Creates_EM_Simulation():
 	material_settings = emlf.MaterialSettings()
 	components = [entity__saline]
 	material_settings.Name = "Saline"
-	material_settings.ElectricProps.Conductivity = 2.0, Unit("S/m")
+	material_settings.ElectricProps.Conductivity =sigmas_saline, Unit("S/m")
 	simulation.Add(material_settings, components)
 
 	# Editing BoundarySettings "Boundary Settings
@@ -473,8 +508,9 @@ def ExtractsResults(simulation):
 		
 	return [flux, peak_averaged_field]  # Flux Current, Peak Averaged E-Field
 		
-def CreatesNeuroCache(axonlist):
-	sim = neuron.Simulation();
+
+def CreatesNeuroCache(axonlist,pulse_duration):
+    sim = neuron.Simulation()
 	s4l.document.AllSimulations.Add(sim)
 
 	# Setup Settings
@@ -504,8 +540,8 @@ def CreatesNeuroCache(axonlist):
 	source_settings.SourceDataObject.DataOrigin.Update()
 	source_settings.PulseType = source_settings.PulseType.enum.Bipolar
 	source_settings.InitialTime = 0.0002, units.Seconds
-	source_settings.AmplitudeP1 = 2.0
-	source_settings.DurationP1 = 0.0004, units.Seconds
+    source_settings.AmplitudeP1 = 1
+    source_settings.DurationP1 = pulse_duration*0.001, units.Seconds
 
 	# Editing SolverSettings "Solver
 	solver_settings = sim.SolverSettings
@@ -613,11 +649,11 @@ xcm.Import(filename_model)
 
 # ## Creation of the Electrode Geometry
 # Read the electrode parameters
-radius = input_values["number_1"]
-length = input_values["number_2"]
-gap = input_values["number_3"]
-angle = input_values["number_4"]
-silicone_length = input_values["number_5"]
+radius = 0.7 
+length = input_values["number_1"]
+gap = input_values["number_2"]
+angle = input_values["number_3"]
+silicone_extra = input_values["number_4"]
 
 ### TODO for testing post-pro -- remove later, start always from scratch
 model_path = output_folder / "model.smash"
@@ -634,34 +670,73 @@ axonlist = model.CreateAxonNeurons(axons, senn_props)
 
 # ## Creation and Execution EM Simulation
 # Creates the EM Simulation
-simulation=Creates_EM_Simulation()
+length = input_values["number_1"]
+gap = input_values["number_2"]
+angle = input_values["number_3"]
+silicone_extra = input_values["number_4"]
+
+sigmas=np.zeros(7)
+sigmas[0]=input_values["number_5"] #0.6624597361833767 sigma_blood=
+sigmas[1]=input_values["number_6"] #0.07919585744745661 sigma_connective=
+sigmas[2]=input_values["number_7"] #0.07919585744745661 sigma_interst=
+sigmas[3]=input_values["number_8"] #0.3479543931346832 sigmas_nerve=
+sigmas[4]=input_values["number_9"] #2.0 sigmas_saline=
+sigmas[5]=input_values["number_10"] # 0.16 sigmas_fasc_tra=
+sigmas[6]=input_values["number_11"] #0.57 sigmas_fasc_lon=
+
+simulation = Creates_EM_Simulation(sigmas)
 simulation.UpdateGrid()
 simulation.CreateVoxels()
-simulation.RunSimulation()
+simulation.RunSimulation(wait=True)
 
 # Extracts the Potential
 [current, peak_averaged_field] = ExtractsResults(simulation)
 
 # ### Creates and Runs The Neuronal Simulation
-neuron_simulation=CreatesNeuroCache(axonlist)
-neuron_simulation.RunSimulation()
-tf=ExtractThresholdsInfo(neuron_simulation)
+pulse_duration=input_values["number_12"]
+neuron_simulation = CreatesNeuroCache(axonlist,pulse_duration)
+neuron_simulation.RunSimulation(wait=True)
+tf = ExtractThresholdsInfo(neuron_simulation)
 
 # Calculates Isopercentiles
-isop5=np.percentile(tf,5)
-isop50=np.percentile(tf,50)
-isop95=np.percentile(tf,95)
+isop5 = np.percentile(tf, 5)
+isop50 = np.percentile(tf, 50)
+isop95 = np.percentile(tf, 95)
+charge5=isop5*pulse_duration
+charge50=isop50*pulse_duration # [ms]*[mA]= [uC]
+charge95=isop95*pulse_duration #
+
+# Get Interface Surface
+surface=GetsSurfaceContact()/100 # from mm2 to cm2 
+charged5=charge5/surface
+charged50=charge50/surface
+
+# Shannon Criteria
+shannon5=np.log10(charged5)+np.log10(charge5)
+shannon50=np.log10(charged50)+np.log10(charge50)
 
 end_time = time.time()
 print(f"Total time spent in pipeline: {end_time - start_time} seconds")
-# ### Provide Output Data
 
-output_values = {"current": float(current), "peak_averaged_field": float(peak_averaged_field), "isop5": float(isop5), "isop50": isop50, "isop95": isop95,}
-print(output_values)
+# ### Provide Output Data
+impedance=1./current # [kOhm]
+
 
 ## convert to the format that the (de)jsonifier understand
 output_values = {
-	f"number_{i+1}": value for i, value in enumerate(output_values.values())    
-}
+    "number_1": float(impedance), 
+    "number_2": float(peak_averaged_field), 
+    "number_3": float(isop5), 
+    "number_4": float(isop50), 
+    "number_5": float(isop95),
+    "number_6": float(charge5), 
+    "number_7": float(charge50), 
+    "number_8": float(charge95),
+    "number_9":float(charged5),
+    "number_10":float(charged50),
+    "number_11":float(shannon5),
+    "number_12":float(shannon50)
+    }
+print(output_values)
 output_values_path = pl.Path(output_folder / "values.json")
 output_values_path.write_text(json.dumps(output_values))
