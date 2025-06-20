@@ -41,8 +41,8 @@ if osparc:
         raise Exception("No INPUTS_FOLDER or INPUTS found in environment variables")
     current_path = Path(os.getcwd())
 else:
-    input_folder = "/home/smu/work/inputs/input_1"
-    output_folder = "/home/smu/work/outputs/output_1"
+    input_folder = Path("/home/smu/work/inputs/input_1")
+    output_folder = Path("/home/smu/work/outputs/output_1")
 
 
 # ## Reading the Parameter File
@@ -67,7 +67,7 @@ def GetsSurfaceContact():
 
 	slice=xcm.Slice([contact,nerve])
 
-	surf=xcm.CoverWireBody(slice)
+	surf=xcm.CoverWireBody(slice) # type: ignore
 	surf[0].Name='Interface'
 
 	surface=xcm.MeasureArea([surf[0]])
@@ -683,7 +683,7 @@ silicone_extra = input_values["number_4"]
 model_path = output_folder / "model.smash"
 # Creates Electrode Parameterized
 Creates_Electrode(length, gap, angle, radius, silicone_extra)
-s4l.document.SaveAs(model_path)
+s4l.document.SaveAs(model_path) # type: ignore
 
 # ### Creation of Axon Distribution
 axons = Create_Axon_Distribution()
