@@ -722,6 +722,9 @@ neuron_simulation = CreatesNeuroCache(axonlist,pulse_duration)
 neuron_simulation.RunSimulation(wait=True)
 tf = ExtractThresholdsInfo(neuron_simulation)
 
+s4l.document.Save() # type: ignore 
+## Save model (to be able to inspect it)
+
 # Calculates Isopercentiles
 isop5 = np.percentile(tf, 5)
 isop50 = np.percentile(tf, 50)
