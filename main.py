@@ -1,51 +1,48 @@
-#!/usr/bin/env python
-# coding: utf-8
-import time
-start_time = time.time()
-
+import json
 import os
 import pathlib as pl
+
+#!/usr/bin/env python
+import time
 from pathlib import Path
 
+import numpy
+import numpy as np
 import s4l_v1 as s4l
-from s4l_v1._api.application import run_application, get_app_safe
+import s4l_v1.analysis as analysis
+import s4l_v1.document as document
+import s4l_v1.model as model
+import s4l_v1.units as units
+import XCoreModeling as xcm
+from s4l_v1 import Vec3
+from s4l_v1._api.application import get_app_safe, run_application
+from s4l_v1.model import Unit
+from s4l_v1.simulation import emlf, neuron
+
+start_time = time.time()
+
 
 x11_available = "DISPLAY" in os.environ
 if get_app_safe() is None:
 	run_application(disable_ui_plugins=not x11_available)
 app = get_app_safe()
 
-osparc=True
+osparc = True
 if osparc:
-	if 'INPUTS_FOLDER' in os.environ:
-		input_folder = Path(os.environ['INPUTS_FOLDER'])
-		output_folder = Path(os.environ['OUTPUTS_FOLDER'])
+    if "INPUTS_FOLDER" in os.environ:
+        input_folder = Path(os.environ["INPUTS_FOLDER"])
+        output_folder = Path(os.environ["OUTPUTS_FOLDER"])
 		comp_service = False
-	elif 'INPUT_FOLDER' in os.environ:
-		input_folder = Path(os.environ['INPUT_FOLDER'])
-		output_folder = Path(os.environ['OUTPUT_FOLDER'])
+    elif "INPUT_FOLDER" in os.environ:
+        input_folder = Path(os.environ["INPUT_FOLDER"])
+        output_folder = Path(os.environ["OUTPUT_FOLDER"])
 		comp_service = True
 	else:
 		raise Exception("No INPUTS_FOLDER or INPUTS found in environment variables")
 	current_path = Path(os.getcwd())
 else:
-	input_folder=Path("/home/smu/work/inputs/input_1")
-	output_folder=Path("/home/smu/work/outputs/output_1")
-
-import numpy
-import s4l_v1.analysis as analysis
-import s4l_v1.document as document
-import s4l_v1.model as model
-import s4l_v1.units as units
-import XCoreModeling as xcm
-from s4l_v1.model import Unit
-from s4l_v1.simulation import emlf, neuron
-
-import XCoreModeling as xcm
-from s4l_v1 import Vec3
-
-import numpy as np
-import json
+    input_folder = "/home/smu/work/inputs/input_1"
+    output_folder = "/home/smu/work/outputs/output_1"
 
 
 # ## Reading the Parameter File
@@ -125,7 +122,15 @@ def Creates_EM_Simulation():
 
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
-	components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
+	components = [
+		entity__fascicle1,
+		entity__fascicle2,
+		entity__fascicle3,
+		entity__fascicle4,
+		entity__fascicle5,
+		entity__fascicle6,
+		entity__fascicle7,
+	]
 	material_settings.Name = "Fascicles"
 	material_settings.ElectricProps.ConductivityAnisotropic = True
 	material_settings.ElectricProps.ConductivityDiagonalElements = numpy.array([0.16, 0.16, 0.57]), Unit("S/m")
@@ -167,8 +172,19 @@ def Creates_EM_Simulation():
 	simulation.Add(material_settings, components)
 
 	# Editing BoundarySettings "Boundary Settings
-	boundary_settings = [x for x in simulation.AllSettings if isinstance(x, emlf.BoundarySettings) and x.Name == "Boundary Settings"][0]
-	components = [component__plane_x, component__plane_x, component__plane_y, component__plane_y, component__plane_z, component__plane_z]
+	boundary_settings = [
+		x
+		for x in simulation.AllSettings
+		if isinstance(x, emlf.BoundarySettings) and x.Name == "Boundary Settings"
+	][0]
+	components = [
+		component__plane_x,
+		component__plane_x,
+		component__plane_y,
+		component__plane_y,
+		component__plane_z,
+		component__plane_z,
+	]
 	simulation.Add(boundary_settings, components)
 	boundary_settings.BoundaryType = boundary_settings.BoundaryType.enum.Flux
 
@@ -188,21 +204,46 @@ def Creates_EM_Simulation():
 
 	# Editing GlobalGridSettings "Grid (Empty)
 	global_grid_settings = simulation.GlobalGridSettings
-	global_grid_settings.DiscretizationMode = global_grid_settings.DiscretizationMode.enum.Manual
+	global_grid_settings.DiscretizationMode = (
+		global_grid_settings.DiscretizationMode.enum.Manual
+	)
 	global_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
-	global_grid_settings.Resolution = numpy.array([0.625, 0.625, 0.625]), units.MilliMeters
+	global_grid_settings.Resolution = (
+		numpy.array([0.625, 0.625, 0.625]),
+		units.MilliMeters,
+	)
 	global_grid_settings.PaddingMode = global_grid_settings.PaddingMode.enum.Manual
 	global_grid_settings.BottomPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
 	global_grid_settings.TopPadding = numpy.array([0.1, 0.1, 0.1]), units.MilliMeters
 
 	# Adding a new ManualGridSettings
-	manual_grid_settings = simulation.AddManualGridSettings([entity__blood1, entity__blood2, entity__blood3, entity__connective, entity__connective_2a, entity__connective_2b, entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7, entity__interstitial, entity__nerve])
+	manual_grid_settings = simulation.AddManualGridSettings(
+		[
+			entity__blood1,
+			entity__blood2,
+			entity__blood3,
+			entity__connective,
+			entity__connective_2a,
+			entity__connective_2b,
+			entity__fascicle1,
+			entity__fascicle2,
+			entity__fascicle3,
+			entity__fascicle4,
+			entity__fascicle5,
+			entity__fascicle6,
+			entity__fascicle7,
+			entity__interstitial,
+			entity__nerve,
+		]
+	)
 	manual_grid_settings.Name = "Nerve"
 	manual_grid_settings.MaxStep = numpy.array([0.01, 0.01, 0.05]), units.MilliMeters
 	manual_grid_settings.Priority = 0.0
 
 	# Adding a new ManualGridSettings
-	manual_grid_settings = simulation.AddManualGridSettings([entity__contact1, entity__contact2, entity__saline, entity__silicone])
+	manual_grid_settings = simulation.AddManualGridSettings(
+		[entity__contact1, entity__contact2, entity__saline, entity__silicone]
+	)
 	manual_grid_settings.Name = "Else"
 	manual_grid_settings.MaxStep = numpy.array([0.05, 0.05, 0.05]), units.MilliMeters
 	manual_grid_settings.Priority = 0.0
@@ -243,7 +284,15 @@ def Creates_EM_Simulation():
 
 	# Adding a new ManualVoxelerSettings
 	manual_voxeler_settings = emlf.ManualVoxelerSettings()
-	components = [entity__fascicle1, entity__fascicle2, entity__fascicle3, entity__fascicle4, entity__fascicle5, entity__fascicle6, entity__fascicle7]
+	components = [
+		entity__fascicle1,
+		entity__fascicle2,
+		entity__fascicle3,
+		entity__fascicle4,
+		entity__fascicle5,
+		entity__fascicle6,
+		entity__fascicle7,
+	]
 	manual_voxeler_settings.Name = "Fascicles"
 	manual_voxeler_settings.Priority = 7
 	simulation.Add(manual_voxeler_settings, components)
@@ -264,7 +313,9 @@ def Creates_EM_Simulation():
 
 	# Editing SolverSettings "Solver
 	solver_settings = simulation.SolverSettings
-	solver_settings.PredefinedTolerances = solver_settings.PredefinedTolerances.enum.High
+	solver_settings.PredefinedTolerances = (
+		solver_settings.PredefinedTolerances.enum.High
+	)
 
 	# Update the materials with the new frequency parameters
 	simulation.UpdateAllMaterials()
@@ -273,92 +324,96 @@ def Creates_EM_Simulation():
 	simulation.UpdateGrid()
 
 	# Add the simulation to the UI
-	document.AllSimulations.Add( simulation )
+	document.AllSimulations.Add(simulation)
 
 	return simulation
 
+def Creates_Electrode(length, gap, angle, radius, silicone_extra):
 
-def Creates_Electrode(length,gap,angle,radius,silicone_length):
+	center = Vec3(0, 0, 1)
 
-	center=Vec3(0,0,1)
-
-	angle=(360-angle)*2*np.pi/360
-	start=0.5*angle
-	end=-0.5*angle
+	angle = (360 - angle) * 2 * np.pi / 360
+	start = 0.5 * angle
+	end = -0.5 * angle
 
 	# Creates the Arc
-	arc=xcm.CreateArc(center,radius,start,end)
-	vertices=[v.Position for v in xcm.GetVertices(arc)]
+	arc = xcm.CreateArc(center, radius, start, end)
+	vertices = [v.Position for v in xcm.GetVertices(arc)]
 
-	verts=[arc]
+	verts = [arc]
 	for v in vertices:
-		verts.append(s4l.model.CreatePolyLine([center,v]))
+		verts.append(s4l.model.CreatePolyLine([center, v]))
 
-	s1=s4l.model.Unite(verts)
+	s1 = s4l.model.Unite(verts)
 	xcm.CoverWireBody(s1)
 
-	contact=ents['Arc 1']
-	contact.Name="Contact 1"
+	contact = ents["Arc 1"]
+	contact.Name = "Contact 1"
 
-	arc=xcm.CreateArc(center,radius+0.05,start-0.1,end+0.1)
-	vertices=[v.Position for v in xcm.GetVertices(arc)]
+	arc = xcm.CreateArc(center, radius + 0.05, start - 0.1, end + 0.1)
+	vertices = [v.Position for v in xcm.GetVertices(arc)]
 
-	verts=[arc]
+	verts = [arc]
 	for v in vertices:
-		verts.append(s4l.model.CreatePolyLine([center,v]))
+		verts.append(s4l.model.CreatePolyLine([center, v]))
 
-	s1=s4l.model.Unite(verts)
+	s1 = s4l.model.Unite(verts)
 	xcm.CoverWireBody(s1)
 
-	silicone=ents['Arc 1']
-	silicone.Name="Silicone"
+	silicone = ents["Arc 1"]
+	silicone.Name = "Silicone"
 
-	e1=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,length)])
-	xcm.SweepAlongPath(contact,e1,True,False)
-	T=s4l.Translation(Vec3(0,0,-0.5*length))
+	e1 = s4l.model.CreatePolyLine([Vec3(0, 0, 0), Vec3(0, 0, length)])
+	xcm.SweepAlongPath(contact, e1, True, False)
+	T = s4l.Translation(Vec3(0, 0, -0.5 * length))
 	contact.ApplyTransform(T)
 	e1.Delete()
 
-	contact1=contact.Clone()
-	contact1.Name="Contact 2"
+	contact1 = contact.Clone()
+	contact1.Name = "Contact 2"
 
-	e2=s4l.model.CreatePolyLine([Vec3(0,0,0),Vec3(0,0,silicone_length)])
-	xcm.SweepAlongPath(silicone,e2,True,False)
-	T=s4l.Translation(Vec3(0,0,-0.5*silicone_length))
+	silicone_length=2*(silicone_extra+length)+gap
+
+	e2 = s4l.model.CreatePolyLine([Vec3(0, 0, 0), Vec3(0, 0, silicone_length)])
+	xcm.SweepAlongPath(silicone, e2, True, False)
+	T = s4l.Translation(Vec3(0, 0, -0.5 * silicone_length))
 	silicone.ApplyTransform(T)
 	e2.Delete()
 
-	dt=0.5*length+0.5*gap
-	T=s4l.Translation(Vec3(0,0,dt))
+	dt = 0.5 * length + 0.5 * gap
+	T = s4l.Translation(Vec3(0, 0, dt))
 	contact.ApplyTransform(T)
-	T=s4l.Translation(Vec3(0,0,-dt))
+	T = s4l.Translation(Vec3(0, 0, -dt))
 	contact1.ApplyTransform(T)
 
 
 def Gets_Flux(em_sensor_extractor):
 	# Adding a new CurrentExtractor
-	inputs = [em_sensor_extractor.Outputs["EM Potential(x,y,z,f0)"], em_sensor_extractor.Outputs["J(x,y,z,f0)"]]
+    inputs = [
+        em_sensor_extractor.Outputs["EM Potential(x,y,z,f0)"],
+        em_sensor_extractor.Outputs["J(x,y,z,f0)"],
+    ]
 	current_extractor = analysis.extractors.CurrentExtractor(inputs=inputs)
 	current_extractor.UpdateAttributes()
 	current_extractor.Update()
-	flux=np.real(current_extractor.GetOutput(0).GetComponent(0))[0]
+    flux = np.real(current_extractor.GetOutput(0).GetComponent(0))[0]
 	
 	return flux
 
 
 def ExtractThresholdsInfo(sim):
-	''' The function extracts the titration results from an electrophysiological simulation '''
+    """The function extracts the titration results from an electrophysiological simulation"""
 
-	assert sim.HasResults()==1, "Neuronal Simulation Should Have Results"
+    assert sim.HasResults() == 1, "Neuronal Simulation Should Have Results"
 
 	results = sim.Results()
 	titration_evaluator = s4l.analysis.neuron_evaluators.TitrationEvaluator()
-	titration_evaluator.Inputs[0].Connect(results["Titration Sensor"]["Titration"] )
+    titration_evaluator.Inputs[0].Connect(results["Titration Sensor"]["Titration"])
 	titration_evaluator.Update(0)
-	tf=list(titration_evaluator.TitrationFactor)      # titration factor
-	tl=list(titration_evaluator.LocationOfFirstSpike) # section of the first spike
-	ts=list(titration_evaluator.TimeOfFirstSpike)     # latency, in [ms]
-	nnames=list(titration_evaluator.NeuronName)        # name of the neuron spiking
+    tf = list(titration_evaluator.TitrationFactor)  # titration factor
+    tl = list(titration_evaluator.LocationOfFirstSpike)  # section of the first spike
+    ts = list(titration_evaluator.TimeOfFirstSpike)  # latency, in [ms]
+    nnames = list(titration_evaluator.NeuronName)  # name of the neuron spiking
 
 	return tf
 
@@ -372,13 +427,15 @@ def ExtractsResults(simulation):
 	em_sensor_extractor = simulation_extractor["Overall Field"]
 
 	###### flux
-	flux=Gets_Flux(em_sensor_extractor)
+	flux = Gets_Flux(em_sensor_extractor)
 
 	# Power Density (Without NaN for Thermal Simulation)
-	scale=0.001/flux
+	scale = 0.001 / flux
 
 	inputs = [em_sensor_extractor.Outputs["EM Potential(x,y,z,f0)"]]
-	user_defined_field_normalizer = s4l.analysis.field.UserDefinedFieldNormalizer(inputs=inputs)
+	user_defined_field_normalizer = s4l.analysis.field.UserDefinedFieldNormalizer(
+		inputs=inputs
+	)
 	user_defined_field_normalizer.Target.Value = scale
 	user_defined_field_normalizer.UpdateAttributes()
 	user_defined_field_normalizer.Update()
@@ -386,9 +443,11 @@ def ExtractsResults(simulation):
 	
 	# Adding a new UserDefinedFieldNormalizer
 	inputs = [em_sensor_extractor.Outputs["EM E(x,y,z,f0)"]]
-	user_defined_field_normalizer = analysis.field.UserDefinedFieldNormalizer(inputs=inputs)
+	user_defined_field_normalizer = analysis.field.UserDefinedFieldNormalizer(
+		inputs=inputs
+	)
 	user_defined_field_normalizer.Target.Value = scale
-	user_defined_field_normalizer.Description='Field Scaling E-Field'
+	user_defined_field_normalizer.Description = "Field Scaling E-Field"
 	user_defined_field_normalizer.UpdateAttributes()
 	document.AllAlgorithms.Add(user_defined_field_normalizer)
 
@@ -400,15 +459,17 @@ def ExtractsResults(simulation):
 	document.AllAlgorithms.Add(volume_average_electric_field_evaluator)
 
 	# Extracting Peak Averaged
-	evaluator=volume_average_electric_field_evaluator.Outputs["Volume-Average Report [ICNIRP 2010]"]
+	evaluator = volume_average_electric_field_evaluator.Outputs[
+		"Volume-Average Report [ICNIRP 2010]"
+	]
 	assert evaluator.Update()
-	keys=evaluator.Data.RowKeys()
-	values=evaluator.Data.ToList()
+	keys = evaluator.Data.RowKeys()
+	values = evaluator.Data.ToList()
 
 	for i in range(len(keys)):
-		print ("Key-value pairs ExtractResults: ", keys[i].split(' (')[0], values[i][0])
+		print("Key-value pairs ExtractResults: ", keys[i].split(" (")[0], values[i][0])
 	
-	peak_averaged_field=values[0][0]
+	peak_averaged_field = values[0][0]
 		
 	return [flux, peak_averaged_field]  # Flux Current, Peak Averaged E-Field
 		
@@ -418,24 +479,28 @@ def CreatesNeuroCache(axonlist):
 
 	# Setup Settings
 	setup_settings = sim.SetupSettings
-	setup_settings.TitrationStrategy=1
+    setup_settings.TitrationStrategy = 1
 	setup_settings.PerformTitration = True
 	setup_settings.DepolarizationDetection.enum.Threshold
 	setup_settings.DepolarizationThreshold = 80.0
 
 	automatic_axon_neuron_settings = neuron.AutomaticAxonNeuronSettings()
-	automatic_axon_neuron_settings.Temperature=37
+    automatic_axon_neuron_settings.Temperature = 37
 
 	# Neuron Settings
-	diams=[]; cnt=0
+    diams = []
 	for axon in axonlist:
-		sim.Add(automatic_axon_neuron_settings,[axon])
+        sim.Add(automatic_axon_neuron_settings, [axon])
 
 	# Adding a new SourceSettings
 	source_settings = sim.AddGenericSource([])
 	source_settings.SourceType = source_settings.SourceType.enum.DataObject
-	source_settings.SourceDataObject.DataOriginType = source_settings.SourceDataObject.DataOriginType.enum.Pipeline
-	source_settings.SourceDataObject.DataOrigin = document.AllAlgorithms["Field Scaling"].Outputs[0].raw
+    source_settings.SourceDataObject.DataOriginType = (
+        source_settings.SourceDataObject.DataOriginType.enum.Pipeline
+    )
+    source_settings.SourceDataObject.DataOrigin = (
+        document.AllAlgorithms["Field Scaling"].Outputs[0].raw
+    )
 	source_settings.SourceDataObject.DataOrigin.Update()
 	source_settings.PulseType = source_settings.PulseType.enum.Bipolar
 	source_settings.InitialTime = 0.0002, units.Seconds
@@ -451,73 +516,80 @@ def CreatesNeuroCache(axonlist):
 
 def Create_Axon_Distribution():
 	
-	axon_ent=s4l.model.CreateGroup('Axons_Folder')
-	point_ent=s4l.model.CreateGroup('Points_Folder')
+    axon_ent = s4l.model.CreateGroup("Axons_Folder")
+    point_ent = s4l.model.CreateGroup("Points_Folder")
 
-	options=xcm.MeshingOptions()
-	options.EdgeLength=0.04# To change to change the density of points
-	options.MinEdgeLength=0.011
-	ns=1 #downsampling factor
+    options = xcm.MeshingOptions()
+    options.EdgeLength = 0.04  # To change to change the density of points
+    options.MinEdgeLength = 0.011
+    ns = 1  # downsampling factor
 
-	cnt=0; cn=0; axonn=0; axons=[]
-	for ent in ents['Fascicles_Folder'].Entities:
-	#for ent in ents['Fascicles_Meshes'].Entities:
+    cnt = 0
+    cn = 0
+    axonn = 0
+    axons = []
+    for ent in ents["Fascicles_Folder"].Entities:
+        # for ent in ents['Fascicles_Meshes'].Entities:
 
 		# Gets the bounding box of the fascicle	
 		entity_bounds = xcm.GetBoundingBox([ent])
-		L = 0.95*(entity_bounds[1][2]-entity_bounds[0][2])
-		z0=0.5*(entity_bounds[1][2]+entity_bounds[0][2])
+        L = 0.95 * (entity_bounds[1][2] - entity_bounds[0][2])
+        z0 = 0.5 * (entity_bounds[1][2] + entity_bounds[0][2])
 
 		# Creates a slice of the fascicle at given location
-		slice=xcm.CreatePlanarSlice(ent,Vec3(0,0,0),Vec3(0,0,1),1)
+        slice = xcm.CreatePlanarSlice(ent, Vec3(0, 0, 0), Vec3(0, 0, 1), 1)
 		xcm.CoverWireBody(slice)
-		slice.Name='tempslice_'+ent.Name
-		name=ent.Name
+        slice.Name = "tempslice_" + ent.Name
+        name = ent.Name
 		
-		slice=xcm.ConvertToTriangleMesh(slice)
-		slice.Name=name
+        slice = xcm.ConvertToTriangleMesh(slice)
+        slice.Name = name
 
-		#slice=xcm.ConvertToTriangleMesh(slice,max_edge_length=0.1) #target=0.1, min=0.001
-		xcm.RemeshTriangleMesh(slice,options)
+        # slice=xcm.ConvertToTriangleMesh(slice,max_edge_length=0.1) #target=0.1, min=0.001
+        xcm.RemeshTriangleMesh(slice, options)
 
 		# Creates a subfolder of axons and point for each fascicle
-		entfold=s4l.model.CreateGroup('S_Points_'+name)
-		splines = s4l.model.CreateGroup('S_Splines_'+ name)
+        entfold = s4l.model.CreateGroup("S_Points_" + name)
+        splines = s4l.model.CreateGroup("S_Splines_" + name)
 
 		# Gets the surface of the fascicle and calculates the equivalent diameter
-		surf=xcm.MeasureArea([slice])
-		diam=2*np.sqrt(surf/np.pi)
+        surf = xcm.MeasureArea([slice])
+        diam = 2 * np.sqrt(surf / np.pi)
 
 		# Creates a surface mesh on the fascicle cross section. The centers of 
 		# the triangles are candidate location of the axons
 		faceter = s4l.analysis.core.ModelToGridFilter()
 		faceter.Entity = slice
-		faceter.MaximumEdgeLength = 0.3*diam
+        faceter.MaximumEdgeLength = 0.3 * diam
 		faceter.Update(0)
 		target_grid = faceter.GetOutput(0)
-		#L=86
+        # L=86
 
-		cm=0
+        cm = 0
 		# Creates the axon trajectories
-		for i in range(0,target_grid.NumberOfCells,ns):
-			p=1e3*target_grid.GetCellCenter(i)
-			point=s4l.model.CreatePoint(p)
-			point.Name='P_'+name+'_'+str(cm)+'_Random'
+        for i in range(0, target_grid.NumberOfCells, ns):
+            p = 1e3 * target_grid.GetCellCenter(i)
+            point = s4l.model.CreatePoint(p)
+            point.Name = "P_" + name + "_" + str(cm) + "_Random"
 			entfold.Add(point)
 			
-			#z = np.random.uniform(zz_min,zz_max)
-			L1=L*np.random.normal(1,0.025)
-			x=p[0]; y=p[1]; z=p[2]
-			a = s4l.model.CreateSpline([Vec3(x,y,z0-0.5*L1),Vec3(x,y,z0+0.5*L1)])
-			a.Name = name + '_Spline_' + str(cm)+'_Random'
+            # z = np.random.uniform(zz_min,zz_max)
+            L1 = L * np.random.normal(1, 0.025)
+            x = p[0]
+            y = p[1]
+            z = p[2]
+            a = s4l.model.CreateSpline(
+                [Vec3(x, y, z0 - 0.5 * L1), Vec3(x, y, z0 + 0.5 * L1)]
+            )
+            a.Name = name + "_Spline_" + str(cm) + "_Random"
 			splines.Add(a)
 			axons.append(a)
 			
-			cm+=1
-			cn+=1
-			axonn+=1
+            cm += 1
+            cn += 1
+            axonn += 1
 			
-		cnt+=1
+        cnt += 1
 		
 		# Adds the axon trajectories and the point in the folders
 		axon_ent.Add(splines)
@@ -526,16 +598,17 @@ def Create_Axon_Distribution():
 		# Delete the slice from the model
 		slice.Delete()
 		
-	print ("Total number of axons:",axonn)
+    print("Total number of axons:", axonn)
 		
 	# Creates Unique Folder for Fibers and Points
-	fold=s4l.model.CreateGroup('Functionalization_'+str(cn))
+    fold = s4l.model.CreateGroup("Functionalization_" + str(cn))
 	fold.Add(axon_ent)
 	fold.Add(point_ent)
 
 	return axons
 
-ents=s4l.model.AllEntities()
+
+ents = s4l.model.AllEntities()
 xcm.Import(filename_model)
 
 # ## Creation of the Electrode Geometry
@@ -549,16 +622,15 @@ silicone_length = input_values["number_5"]
 ### TODO for testing post-pro -- remove later, start always from scratch
 model_path = output_folder / "model.smash"
 # Creates Electrode Parameterized
-Creates_Electrode(length,gap,angle,radius,silicone_length)
+Creates_Electrode(length, gap, angle, radius, silicone_extra)
 s4l.document.SaveAs(model_path)
 
-
 # ### Creation of Axon Distribution
-axons=Create_Axon_Distribution()
+axons = Create_Axon_Distribution()
 # Converts into myelinated axons
 senn_props = s4l.model.SennNeuronProperties()
 senn_props.AxonDiameter = 10
-axonlist = model.CreateAxonNeurons(axons,senn_props)
+axonlist = model.CreateAxonNeurons(axons, senn_props)
 
 # ## Creation and Execution EM Simulation
 # Creates the EM Simulation
@@ -568,7 +640,7 @@ simulation.CreateVoxels()
 simulation.RunSimulation()
 
 # Extracts the Potential
-[current,peak_averaged_field]=ExtractsResults(simulation)
+[current, peak_averaged_field] = ExtractsResults(simulation)
 
 # ### Creates and Runs The Neuronal Simulation
 neuron_simulation=CreatesNeuroCache(axonlist)
