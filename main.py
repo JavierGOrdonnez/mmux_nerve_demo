@@ -77,8 +77,6 @@ def GetsSurfaceContact():
 	return surface
 
 def Creates_EM_Simulation(sigmas):
-	import s4l_v1.materials.database as database
-
 	sigma_blood=sigmas[0] #0.6624597361833767
 	sigma_connective=sigmas[1] #0.07919585744745661
 	sigma_interst=sigmas[2] #0.07919585744745661
@@ -93,12 +91,10 @@ def Creates_EM_Simulation(sigmas):
 	# Mapping the components and entities
 	component__plane_x = simulation.AllComponents["Plane X+"]
 	component__plane_x = simulation.AllComponents["Plane X-"]
-	component__background = simulation.AllComponents["Background"]
 	component__plane_y = simulation.AllComponents["Plane Y+"]
 	component__plane_y = simulation.AllComponents["Plane Y-"]
 	component__plane_z = simulation.AllComponents["Plane Z+"]
 	component__plane_z = simulation.AllComponents["Plane Z-"]
-	component__overall_field = simulation.AllComponents["Overall Field"]
 	entity__contact1 = model.AllEntities()["Contact 1"]
 	entity__blood2 = model.AllEntities()["Blood 2"]
 	entity__fascicle1 = model.AllEntities()["Fascicle 1"]
@@ -119,6 +115,25 @@ def Creates_EM_Simulation(sigmas):
 	entity__contact2 = model.AllEntities()["Contact 2"]
 	entity__blood1 = model.AllEntities()["Blood 1"]
 
+	# Ensure all components and entities are not None
+	components = [
+		component__plane_x, component__plane_y, component__plane_z,
+	]
+	for component in components:
+		assert component is not None, f"Component {component} could not be retrieved."
+
+	# Ensure none of the entities are None
+	entities = [
+		entity__contact1, entity__blood2, entity__fascicle1, entity__fascicle3,
+		entity__fascicle4, entity__fascicle2, entity__fascicle7, entity__connective_2b,
+		entity__blood3, entity__fascicle5, entity__connective_2a, entity__saline,
+		entity__connective, entity__nerve, entity__silicone, entity__interstitial,
+		entity__fascicle6, entity__contact2, entity__blood1
+	]
+	for entity in entities:
+		assert entity is not None, f"Entity {entity} could not be retrieved."
+
+
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
 	components = [entity__silicone]
@@ -128,29 +143,19 @@ def Creates_EM_Simulation(sigmas):
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
 	components = [entity__blood1, entity__blood2, entity__blood3]
-	mat = database["IT'IS LF 4.2"]["Blood"]
-	if mat is not None:
-		simulation.LinkMaterialWithDatabase(material_settings, mat)
-	else:
-		# Fallback if material is not found
-		material_settings.Name = "Blood"
-		material_settings.MassDensity = 1049.75, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = sigma_blood, Unit("S/m")
-		material_settings.ElectricProps.RelativePermittivity = 5258.608390020375
+	material_settings.Name = "Blood"
+	material_settings.MassDensity = 1049.75, Unit("kg/m^3") # type: ignore
+	material_settings.ElectricProps.Conductivity = sigma_blood, Unit("S/m")
+	material_settings.ElectricProps.RelativePermittivity = 5258.608390020375
 	simulation.Add(material_settings, components)
 
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
 	components = [entity__connective, entity__connective_2a, entity__connective_2b]
-	mat = database["IT'IS LF 4.2"]["Connective Tissue"]
-	if mat is not None:
-		simulation.LinkMaterialWithDatabase(material_settings, mat)
-	else:
-		# Fallback if material is not found
-		material_settings.Name = "Connective Tissue"
-		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = sigma_connective, Unit("S/m")
-		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
+	material_settings.Name = "Connective Tissue"
+	material_settings.MassDensity = 1026.5, Unit("kg/m^3") # type: ignore
+	material_settings.ElectricProps.Conductivity = sigma_connective, Unit("S/m")
+	material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
 	simulation.Add(material_settings, components)
 
 	# Adding a new MaterialSettings
@@ -174,29 +179,19 @@ def Creates_EM_Simulation(sigmas):
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
 	components = [entity__interstitial]
-	mat = database["IT'IS LF 4.2"]["Connective Tissue"]
-	if mat is not None:
-		simulation.LinkMaterialWithDatabase(material_settings, mat)
-	else:
-		# Fallback if material is not found
-		material_settings.Name = "Connective Tissue"
-		material_settings.MassDensity = 1026.5, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = sigma_interst, Unit("S/m")
-		material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
+	material_settings.Name = "Connective Tissue"
+	material_settings.MassDensity = 1026.5, Unit("kg/m^3") # # type: ignore
+	material_settings.ElectricProps.Conductivity = sigma_interst, Unit("S/m")
+	material_settings.ElectricProps.RelativePermittivity = 302705.19018286216
 	simulation.Add(material_settings, components)
 
 	# Adding a new MaterialSettings
 	material_settings = emlf.MaterialSettings()
 	components = [entity__nerve]
-	mat = database["IT'IS LF 4.2"]["Nerve"]
-	if mat is not None:
-		simulation.LinkMaterialWithDatabase(material_settings, mat)
-	else:
-		# Fallback if material is not found
-		material_settings.Name = "Nerve"
-		material_settings.MassDensity = 1075.0, Unit("kg/m^3")
-		material_settings.ElectricProps.Conductivity = sigmas_nerve, Unit("S/m")
-		material_settings.ElectricProps.RelativePermittivity = 69911.4914652573
+	material_settings.Name = "Nerve"
+	material_settings.MassDensity = 1075.0, Unit("kg/m^3") # # type: ignore
+	material_settings.ElectricProps.Conductivity = sigmas_nerve, Unit("S/m")
+	material_settings.ElectricProps.RelativePermittivity = 69911.4914652573
 	simulation.Add(material_settings, components)
 
 	# Adding a new MaterialSettings
